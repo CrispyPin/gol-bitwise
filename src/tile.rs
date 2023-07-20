@@ -1,4 +1,4 @@
-pub type Row = u16;
+pub type Row = u64;
 
 pub const WIDTH: usize = Row::BITS as usize;
 const LAST: usize = WIDTH - 1;
@@ -31,17 +31,12 @@ impl Tile {
 		self.rows.iter().fold(0, |a, r| a | r) == 0
 	}
 
-	pub fn glider() -> Self {
-		let mut tile = Self::new();
-
-		tile.rows[WIDTH - 8] = 0b_00100000;
-		tile.rows[WIDTH - 7] = 0b_00010000;
-		tile.rows[WIDTH - 6] = 0b_01110000;
-
-		tile.rows[WIDTH - 3] = 0b_0010;
-		tile.rows[WIDTH - 2] = 0b_0001;
-		tile.rows[WIDTH - 1] = 0b_0111;
-		tile
+	pub fn random() -> Self {
+		let mut t = Self::new();
+		for r in 0..(WIDTH / 2) {
+			t.rows[r] = rand::random();
+		}
+		t
 	}
 
 	pub fn print_row(&self, ch_row: usize) {
@@ -92,7 +87,7 @@ impl Tile {
 			partial_sums_2[y] = (left & right) | ((left ^ right) & row);
 		}
 
-		for y in 1..LAST {
+		for y in 1..(WIDTH - 1) {
 			step_row(
 				&mut tile[y],
 				partial_sums_1[y - 1],
@@ -139,7 +134,7 @@ impl Tile {
 }
 
 impl Edges {
-	pub fn full(
+	pub fn new(
 		n: &Tile,
 		s: &Tile,
 		e: &Tile,
@@ -194,6 +189,7 @@ impl Edges {
 	fn ne_bit(&self) -> Row {
 		self.ne as Row
 	}
+
 	fn se_bit(&self) -> Row {
 		self.se as Row
 	}

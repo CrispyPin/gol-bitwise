@@ -6,7 +6,7 @@ fn main() {
 	let mut region = Region::new();
 
 	loop {
-		println!("---");
+		println!("####################");
 		region.print_all();
 		region.step();
 		{
