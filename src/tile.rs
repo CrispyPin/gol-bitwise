@@ -27,6 +27,17 @@ impl Tile {
 		Self::EMPTY
 	}
 
+	pub fn gliders() -> Self {
+		let mut t = Self::EMPTY;
+		t.rows[1] = 0b1110000;
+		t.rows[2] = 0b1000000;
+		t.rows[3] = 0b0100000;
+		t.rows[WIDTH - 4] = 0b0100;
+		t.rows[WIDTH - 3] = 0b0010;
+		t.rows[WIDTH - 2] = 0b1110;
+		t
+	}
+
 	pub fn edge_east(&self) -> Row {
 		let mut edge = 0;
 		for n in 0..WIDTH {

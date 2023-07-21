@@ -9,7 +9,7 @@ edition = "2021"
 rand = "0.8.5"
 
 [[bench]]
-name = "large_grid"
+name = "main"
 harness = false
 
 [dev-dependencies]

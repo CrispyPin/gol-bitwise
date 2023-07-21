@@ -19,6 +19,10 @@ impl Region {
 		}
 	}
 
+	pub fn set_tile(&mut self, tile: Tile, x: usize, y: usize) {
+		self.tiles[y][x] = tile;
+	}
+
 	pub fn height(&self) -> usize {
 		self.tiles.len()
 	}
