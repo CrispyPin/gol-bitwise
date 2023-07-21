@@ -5,9 +5,10 @@ use region::Region;
 fn main() {
 	let mut region = Region::new(1, 1);
 	region.randomise();
+	print!("\x1B[2J"); // clear screen
 
 	loop {
-		println!("####################");
+		print!("\x1B[u"); // reset cursor
 		region.print_all(true);
 		region.step();
 		region.auto_grow();
