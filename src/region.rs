@@ -3,25 +3,19 @@ use crate::tile::{Edges, Tile, WIDTH};
 pub struct Region {
 	/// rows of tiles
 	tiles: Vec<Vec<Tile>>,
-	auto_expand: bool,
 }
 
 impl Region {
-	pub fn new() -> Self {
-		let width = 2;
-		let height = 2;
-		let mut tiles = Vec::new();
-		for _ in 0..height {
-			let mut row = Vec::new();
-			for _ in 0..width {
-				row.push(Tile::random());
-			}
-			tiles.push(row);
-		}
+	pub fn new(width: usize, height: usize) -> Self {
+		let tiles = vec![vec![Tile::new(); width]; height];
+		Self { tiles }
+	}
 
-		Self {
-			tiles,
-			auto_expand: false,
+	pub fn randomise(&mut self) {
+		for row in self.tiles.iter_mut() {
+			for tile in row {
+				tile.randomise()
+			}
 		}
 	}
 
@@ -33,22 +27,25 @@ impl Region {
 		self.tiles[0].len()
 	}
 
-	pub fn print_all(&self) {
+	pub fn print_all(&self, tile_grid: bool) {
 		for y in 0..self.height() {
 			for ch_row in 0..(WIDTH / 2) {
 				for x in 0..self.width() {
 					self.tiles[y][x].print_row(ch_row);
-					// print!("|");
+					if tile_grid {
+						print!("|");
+					}
 				}
 				println!()
 			}
-			// println!("------");
+			if tile_grid {
+				println!(
+					"{}",
+					format!("{:->w$}", "+", w = WIDTH + 1).repeat(self.width())
+				);
+			}
 		}
 	}
-
-	// pub fn set_cell(&mut self, x: isize, y: isize, state: bool) {
-	// 	//
-	// }
 
 	fn get_tile_relative(&self, x: usize, y: usize, relx: isize, rely: isize) -> Option<&Tile> {
 		self.tiles
@@ -82,8 +79,33 @@ impl Region {
 				self.tiles[y][x].step(&edges[y][x]);
 			}
 		}
-		if self.auto_expand {
-			// todo
+	}
+
+	pub fn auto_grow(&mut self) {
+		if self.tiles[0].iter().any(|tile| tile.rows[0] != 0) {
+			let row = vec![Tile::new(); self.width()];
+			self.tiles.insert(0, row);
+		}
+		if self.tiles[self.height() - 1]
+			.iter()
+			.any(|tile| tile.rows[WIDTH - 1] != 0)
+		{
+			let row = vec![Tile::new(); self.width()];
+			self.tiles.push(row);
+		}
+		if self.tiles.iter().any(|row| row[0].edge_west() != 0) {
+			for row in &mut self.tiles {
+				row.insert(0, Tile::new());
+			}
+		}
+		if self
+			.tiles
+			.iter()
+			.any(|row| row[row.len() - 1].edge_east() != 0)
+		{
+			for row in &mut self.tiles {
+				row.push(Tile::new());
+			}
 		}
 	}
 }

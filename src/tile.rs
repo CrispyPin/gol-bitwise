@@ -1,4 +1,4 @@
-pub type Row = u64;
+type Row = u16;
 
 pub const WIDTH: usize = Row::BITS as usize;
 const LAST: usize = WIDTH - 1;
@@ -24,19 +24,29 @@ impl Tile {
 	pub const EMPTY: Tile = Tile { rows: [0; WIDTH] };
 
 	pub fn new() -> Self {
-		Self { rows: [0; WIDTH] }
+		Self::EMPTY
 	}
 
-	pub fn is_empty(&self) -> bool {
-		self.rows.iter().fold(0, |a, r| a | r) == 0
-	}
-
-	pub fn random() -> Self {
-		let mut t = Self::new();
-		for r in 0..(WIDTH / 2) {
-			t.rows[r] = rand::random();
+	pub fn edge_east(&self) -> Row {
+		let mut edge = 0;
+		for n in 0..WIDTH {
+			edge |= (self.rows[n] & 1) << n;
 		}
-		t
+		edge
+	}
+
+	pub fn edge_west(&self) -> Row {
+		let mut edge = 0;
+		for n in 0..WIDTH {
+			edge |= (self.rows[n] >> LAST) << n;
+		}
+		edge
+	}
+
+	pub fn randomise(&mut self) {
+		for r in 0..WIDTH {
+			self.rows[r] = rand::random();
+		}
 	}
 
 	pub fn print_row(&self, ch_row: usize) {
@@ -144,17 +154,11 @@ impl Edges {
 		se: &Tile,
 		sw: &Tile,
 	) -> Self {
-		let mut east = 0;
-		let mut west = 0;
-		for n in 0..WIDTH {
-			east |= (e.rows[n] >> LAST) << n;
-			west |= (w.rows[n] & 1) << n;
-		}
 		Self {
 			n: n.rows[LAST],
 			s: s.rows[0],
-			e: east,
-			w: west,
+			e: e.edge_west(),
+			w: w.edge_east(),
 			nw: (nw.rows[LAST] & 1) != 0,
 			ne: (ne.rows[LAST] >> LAST) != 0,
 			sw: (sw.rows[0] & 1) != 0,
