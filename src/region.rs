@@ -47,10 +47,13 @@ impl Region {
 		}
 	}
 
-	fn get_tile_relative(&self, x: usize, y: usize, relx: isize, rely: isize) -> Option<&Tile> {
+	fn get_tile_rel(&self, x: usize, y: usize, relx: isize, rely: isize) -> &Tile {
+		let (Some(x), Some(y)) = (x.checked_add_signed(relx), y.checked_add_signed(rely))
+			else { return &Tile::EMPTY; };
 		self.tiles
-			.get(y.checked_add_signed(rely)?)
-			.and_then(|row| row.get(x.checked_add_signed(relx)?))
+			.get(y)
+			.and_then(|row| row.get(x))
+			.unwrap_or(&Tile::EMPTY)
 	}
 
 	pub fn step(&mut self) {
@@ -59,14 +62,14 @@ impl Region {
 		for y in 0..self.height() {
 			let mut row = Vec::with_capacity(self.width());
 			for x in 0..self.width() {
-				let n = self.get_tile_relative(x, y, 0, -1).unwrap_or(&Tile::EMPTY);
-				let s = self.get_tile_relative(x, y, 0, 1).unwrap_or(&Tile::EMPTY);
-				let e = self.get_tile_relative(x, y, 1, 0).unwrap_or(&Tile::EMPTY);
-				let w = self.get_tile_relative(x, y, -1, 0).unwrap_or(&Tile::EMPTY);
-				let ne = self.get_tile_relative(x, y, 1, -1).unwrap_or(&Tile::EMPTY);
-				let nw = self.get_tile_relative(x, y, -1, -1).unwrap_or(&Tile::EMPTY);
-				let se = self.get_tile_relative(x, y, 1, 1).unwrap_or(&Tile::EMPTY);
-				let sw = self.get_tile_relative(x, y, -1, 1).unwrap_or(&Tile::EMPTY);
+				let n = self.get_tile_rel(x, y, 0, -1);
+				let s = self.get_tile_rel(x, y, 0, 1);
+				let e = self.get_tile_rel(x, y, 1, 0);
+				let w = self.get_tile_rel(x, y, -1, 0);
+				let ne = self.get_tile_rel(x, y, 1, -1);
+				let nw = self.get_tile_rel(x, y, -1, -1);
+				let se = self.get_tile_rel(x, y, 1, 1);
+				let sw = self.get_tile_rel(x, y, -1, 1);
 
 				let edge = Edges::new(n, s, e, w, ne, nw, se, sw);
 				row.push(edge);
