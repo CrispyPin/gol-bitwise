@@ -1,6 +1,4 @@
-mod region;
-mod tile;
-use region::Region;
+use gol_bitwise::region::Region;
 
 fn main() {
 	let mut region = Region::new(1, 1);

@@ -7,3 +7,12 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8.5"
+
+[[bench]]
+name = "large_grid"
+harness = false
+
+[dev-dependencies]
+criterion = { version = "0.5.1", default-features = false, features = [
+	"cargo_bench_support",
+] }
