@@ -1,4 +1,4 @@
-type Row = u16;
+pub type Row = u16;
 
 pub const WIDTH: usize = Row::BITS as usize;
 const LAST: usize = WIDTH - 1;
@@ -15,7 +15,7 @@ pub struct Edges {
 	se: bool,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Tile {
 	pub rows: [Row; WIDTH],
 }

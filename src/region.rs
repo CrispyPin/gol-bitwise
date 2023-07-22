@@ -1,4 +1,4 @@
-use crate::tile::{Edges, Tile, WIDTH};
+use crate::tile::{Edges, Row, Tile, WIDTH};
 
 pub struct Region {
 	/// rows of tiles
@@ -8,6 +8,35 @@ pub struct Region {
 impl Region {
 	pub fn new(width: usize, height: usize) -> Self {
 		let tiles = vec![vec![Tile::new(); width]; height];
+		Self { tiles }
+	}
+
+	pub fn from_bools(board: Vec<Vec<bool>>) -> Self {
+		let height = board.len() / WIDTH + 1;
+		let width = board[0].len() / WIDTH + 1;
+		let mut tiles = vec![vec![Tile::new(); width]; height];
+
+		for tile_y in 0..height {
+			for tile_x in 0..width {
+				let tile = &mut tiles[tile_y][tile_x];
+				for y in 0..WIDTH {
+					let by = tile_y * WIDTH + y;
+					if by >= board.len() {
+						break;
+					}
+					let mut row = 0;
+					for x in 0..WIDTH {
+						let bx = tile_x * WIDTH + x;
+						if bx >= board[by].len() {
+							break;
+						}
+						row |= (board[by][bx] as Row) << (WIDTH - x - 1) as Row;
+					}
+					tile.rows[y] = row;
+				}
+			}
+		}
+
 		Self { tiles }
 	}
 

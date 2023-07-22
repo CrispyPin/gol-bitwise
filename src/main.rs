@@ -1,13 +1,21 @@
-use gol_bitwise::region::Region;
+use std::env;
+
+use gol_bitwise::{region::Region, rle};
 
 fn main() {
-	let mut region = Region::new(1, 1);
-	region.randomise();
-	print!("\x1B[2J"); // clear screen
+	let mut region = if let Some(file) = env::args().nth(1) {
+		Region::from_bools(rle::parse(&file).unwrap())
+	} else {
+		let mut r = Region::new(1, 1);
+		r.randomise();
+		r
+	};
+	region.auto_grow();
 
 	loop {
+		print!("\x1B[2J"); // clear screen
 		print!("\x1B[u"); // reset cursor
-		region.print_all(true);
+		region.print_all(false);
 		region.step();
 		region.auto_grow();
 		{
