@@ -1,9 +1,9 @@
-pub type Row = u16;
+pub type Row = u64;
 
 pub const WIDTH: usize = Row::BITS as usize;
 const LAST: usize = WIDTH - 1;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Edges {
 	n: Row,
 	s: Row,
@@ -18,10 +18,14 @@ pub struct Edges {
 #[derive(Clone, Debug)]
 pub struct Tile {
 	pub rows: [Row; WIDTH],
+	pub edges: Edges,
 }
 
 impl Tile {
-	pub const EMPTY: Tile = Tile { rows: [0; WIDTH] };
+	pub const EMPTY: Tile = Tile {
+		rows: [0; WIDTH],
+		edges: Edges::EMPTY,
+	};
 
 	pub fn new() -> Self {
 		Self::EMPTY
@@ -78,7 +82,7 @@ impl Tile {
 		print!("{row}");
 	}
 
-	pub fn step(&mut self, edges: &Edges) {
+	pub fn step(&mut self) {
 		fn step_row(state: &mut Row, a0: Row, a1: Row, b0: Row, b1: Row, c0: Row, c1: Row) {
 			// simulates addition of [WIDTH] groups of 3 2-bit numbers using bitwise operations
 
@@ -102,8 +106,8 @@ impl Tile {
 		let tile = &mut self.rows;
 
 		for (y, row) in tile.iter().enumerate() {
-			let left = (row >> 1) | edges.west_bit(y);
-			let right = (row << 1) | edges.east_bit(y);
+			let left = (row >> 1) | self.edges.west_bit(y);
+			let right = (row << 1) | self.edges.east_bit(y);
 			partial_sums_1[y] = row ^ left ^ right;
 			partial_sums_2[y] = (left & right) | ((left ^ right) & row);
 		}
@@ -122,9 +126,9 @@ impl Tile {
 
 		// top and bottom cases
 		let (partial_north_1, partial_north_2) = {
-			let row = edges.n;
-			let left = (row >> 1) | edges.nw_bit();
-			let right = (row << 1) | edges.ne_bit();
+			let row = self.edges.n;
+			let left = (row >> 1) | self.edges.nw_bit();
+			let right = (row << 1) | self.edges.ne_bit();
 			(row ^ left ^ right, (left & right) | ((left ^ right) & row))
 		};
 		step_row(
@@ -137,9 +141,9 @@ impl Tile {
 			partial_sums_2[1],
 		);
 		let (partial_south_1, partial_south_2) = {
-			let row = edges.s;
-			let left = (row >> 1) | edges.sw_bit();
-			let right = (row << 1) | edges.se_bit();
+			let row = self.edges.s;
+			let left = (row >> 1) | self.edges.sw_bit();
+			let right = (row << 1) | self.edges.se_bit();
 			(row ^ left ^ right, (left & right) | ((left ^ right) & row))
 		};
 		step_row(
@@ -155,6 +159,17 @@ impl Tile {
 }
 
 impl Edges {
+	pub const EMPTY: Self = Self {
+		n: 0,
+		s: 0,
+		e: 0,
+		w: 0,
+		nw: false,
+		ne: false,
+		sw: false,
+		se: false,
+	};
+
 	pub fn new(
 		n: &Tile,
 		s: &Tile,

@@ -90,10 +90,7 @@ impl Region {
 	}
 
 	pub fn step(&mut self) {
-		// store edges
-		let mut edges = Vec::with_capacity(self.height());
 		for y in 0..self.height() {
-			let mut row = Vec::with_capacity(self.width());
 			for x in 0..self.width() {
 				let n = self.get_tile_rel(x, y, 0, -1);
 				let s = self.get_tile_rel(x, y, 0, 1);
@@ -103,16 +100,13 @@ impl Region {
 				let nw = self.get_tile_rel(x, y, -1, -1);
 				let se = self.get_tile_rel(x, y, 1, 1);
 				let sw = self.get_tile_rel(x, y, -1, 1);
-
-				let edge = Edges::new(n, s, e, w, ne, nw, se, sw);
-				row.push(edge);
+				self.tiles[y][x].edges = Edges::new(n, s, e, w, ne, nw, se, sw);
 			}
-			edges.push(row);
 		}
 
 		for y in 0..self.height() {
 			for x in 0..self.width() {
-				self.tiles[y][x].step(&edges[y][x]);
+				self.tiles[y][x].step();
 			}
 		}
 	}
